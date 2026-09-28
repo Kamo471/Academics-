@@ -1,1 +1,275 @@
-no
+CMPG 325 — MILESTONE 1: CLIENT DESIGN REVIEW 
+Project ID: CMPG325-2026-078
+Client ID: CLI-078
+Client: Kgosiemang & Associates Attorneys
+Location: Mahikeng
+Industry: Legal Services
+1. Client Requirements 
+Kgosiemang & Associates Attorneys is a legal-services organisation requiring a reliable, scalable 
+and testable computer network. The proposed network will provide connectivity between the 
+organisation's departments, wired devices and wireless clients.
+The following requirements were identified from the project brief:
+ The network must use the assigned addressing block 192.168.39.0/24. 
+ The network must provide appropriate connectivity and network services. 
+ The network must include appropriate routers, switches, end devices and other required 
+network nodes. 
+ The network must be designed and simulated using Cisco Packet Tracer. 
+ The network must include a Wireless LAN with Access Point integration and coverage. 
+ The Wireless LAN must be configured, verified and demonstrated. 
+ The network must accommodate the addition of a new department next year. 
+ The network must incorporate CR15, which requires a second Internet connection for 
+resilience. 
+ End-to-end connectivity must be tested. 
+ The assigned Wireless LAN challenge must be tested. 
+ Important design decisions, configuration, testing and troubleshooting must be 
+documented in the GitHub portfolio. 
+Design Assumptions 
+The project brief does not specify the exact departments, number of employees, number of 
+devices or physical office layout. Therefore, the following reasonable assumptions have been 
+made for the proposed network design:
+ The organisation consists of Management, Attorneys, Administration, Finance and 
+Reception departments. 
+ Each department is assumed to have an appropriate number of desktop computers. 
+ Attorneys and selected management staff are assumed to use laptops. 
+ Network printers are assumed to be available for document-related activities. 
+ An internal server is assumed to provide required network services. 
+ Departments are logically separated using VLANs and separate IP subnets. 
+ A dedicated Wireless LAN is provided for wireless users. 
+ A dedicated subnet is reserved for the future department. 
+ Two Internet connections are included to satisfy CR15 and provide resilience. 
+ The proposed network is an engineered solution based on the project scenario and does 
+not claim to reproduce the actual network of Kgosiemang & Associates Attorneys. 
+2. Physical Topology Design Report 
+The physical topology for Kgosiemang & Associates Attorneys has been designed and 
+implemented within Cisco Packet Tracer using a structured, three-tier hierarchical campus 
+network model. This approach decouples device failure domains and provides high-speed 
+backbone switching, ensuring structural stability, ease of testing, and modular scalability.
+By utilizing a Cisco Catalyst 3650 Multilayer Layer 3 Switch as a centralized distribution core, 
+internal inter-VLAN departmental routing is handled entirely at the switching layer. This design 
+keeps local traffic local and frees up the edge routing layer to focus entirely on handling publicfacing Internet traffic and executing failover strategies.
+ 
+ 2.1 Hardware Infrastructure Inventory Spec Sheet 
+The simulated workspace environment contains the following baseline hardware components to 
+satisfy the law firm's strict business constraints:
+ Public Internet Demarcation (2): Two Cloud-PT instances configured as separate public 
+WAN boundaries (Internet 1 and Internet 2).
+ Upstream Service Providers (2): Two Cisco ISR 4331 Routers acting as simulated service 
+networks (ISP 1 and ISP 2).
+ Enterprise Edge Gateways (2): Two Cisco ISR 4331 Routers (R1 and R2) arranged in a 
+dual-homed, resilient layout to satisfy change request CR15.
+ Central Routing Backbone (1): One Cisco Catalyst 3650 24PS Multilayer Switch (CORE 
+SWITCH) equipped with an internal AC power supply module to manage internal highspeed routing.
+ Access Layer Hubs (3): Three Cisco Catalyst 2960 24TT Layer 2 Switches (SW1, SW2, 
+and SW3) deployed to manage local department connections.
+ Wireless Media Bridge (1): One standalone Access Point-PT node (Access Point0) to 
+provide local over-the-air signal coverage.
+ Departmental End Nodes (8):
+o 5 Desktop PCs: Mgmt-PC, Finance-PC, Attorneys-PC, Admin-PC, and ReceptionPC.
+o 1 Central Database Server: One Server-PT module (Local-Server).
+o 1 Shared Network Appliance: One Printer-PT asset (Network-Printer).
+o 1 Corporate User Workstation: One Laptop-PT unit (Wireless-Laptop) equipped 
+with an enterprise-grade WPC300N internal wireless antenna module.
+2.2 Hierarchical Physical Workspace Diagram 
+Figure1: Physical Topology
+View on GitHub: https://github.com/Kamo471/Kgosiemang-Attorneys-Networks
+Cloud-PT Internet1 Cloud-PT Internet2
+ ISR4331 ISP1 ISR4331 ISP1 
+ ISR4331 R1 ISR4331 R2
+ 3650 24PS
+ CORE SWITCH│
+ 2960-24TT SW1 2960-24TT SW2 2960-24TT SW3 
+ Mgmt-PC Finance-PC Attorneys-PC Admin-PC Wireless Laptop
+ Local-Server Reception-PC, Access Point
+ Access Point 
+ 
+3. Logical Topology & Routing Design
+The internal inter-VLAN corporate traffic is maintained directly on the multilayer core backbone. 
+Although frame pipelines run across common physical trunks, layer-3 virtual boundaries isolate 
+individual broadcast domains.
+3.1 Flowchart Layout
+3.2 Automated Edge Path Routing Flow (CR15 Resilience) 
+ Primary Gateway Definition: The Core Switch pathways point outbound corporate
+internet frames directly down the primary transit line to R1 (ip route 0.0.0.0 0.0.0.0 
+192.168.39.162) with an Administrative Distance of 1.
+ Floating Backup Definition: A second floating backup route points traffic down the 
+secondary line to R2 (ip route 0.0.0.0 0.0.0.0 192.168.39.166 10) with an elevated 
+Administrative Distance of 10.
+ Failover Engine Mechanics: The backup route remains inactive while the primary 
+gateway connection is alive. If a hardware outage strikes R1, the Core Switch instantly 
+fails over to R2 and ISP2. This meets the CR15 redundancy parameters perfectly.
+4. IP Addressing Plan 
+The assigned network space 192.168.39.0/24 has been custom-subnetted using Variable Length 
+Subnet Masking (VLSM) to accommodate departmental host capacities, reserve expansion space, 
+and establish resilient backbone pathways.
+VLA
+N 
+ID 
+Department 
+/ Function 
+Host 
+Cap
+acity 
+Subnet 
+Address 
+Subnet 
+Mask 
+Assignable 
+Host Range 
+Default 
+Gateway 
+10 Managemen
+t
+10 192.168.39.0
+/28
+255.255.25
+5.240
+192.168.3
+9.2 –
+192.168.3
+9.14
+192.168.3
+9.1
+20 Attorneys 25 192.168.39.1
+6/27
+255.255.25
+5.224
+192.168.3
+9.18 –
+192.168.3
+9.46
+192.168.3
+9.17
+30 Administrat
+ion 8
+192.168.39.4
+8/28
+255.255.25
+5.240
+192.168.3
+9.50 –
+192.168.3
+9.62
+192.168.3
+9.49
+40 Finance 12 192.168.39.6
+4/28
+255.255.25
+5.240
+192.168.3
+9.66 –
+192.168.3
+9.78
+192.168.3
+9.65
+VLA
+N 
+ID 
+Department 
+/ Function 
+Host 
+Cap
+acity 
+Subnet 
+Address 
+Subnet 
+Mask 
+Assignable 
+Host Range 
+Default 
+Gateway 
+50 Reception 5
+192.168.39.8
+0/28
+255.255.25
+5.240
+192.168.3
+9.82 –
+192.168.3
+9.94
+192.168.3
+9.81
+60 Local 
+Servers 2
+192.168.39.9
+6/28
+255.255.25
+5.240
+192.168.3
+9.98 –
+192.168.3
+9.110
+192.168.3
+9.97
+70 Wireless 
+LAN 5
+192.168.39.1
+12/28
+255.255.25
+5.240
+192.168.3
+9.114 –
+192.168.3
+9.126
+192.168.3
+9.113
+80 Future 
+Expansion 50 192.168.39.1
+28/26
+255.255.25
+5.192
+192.168.3
+9.130 –
+192.168.3
+9.190
+192.168.3
+9.129
+──
+Transit 
+(Core-toR1)
+2
+192.168.39.1
+60/30
+255.255.25
+5.252
+192.168.3
+9.161 –
+192.168.3
+9.162
+N/A
+VLA
+N 
+ID 
+Department 
+/ Function 
+Host 
+Cap
+acity 
+Subnet 
+Address 
+Subnet 
+Mask 
+Assignable 
+Host Range 
+Default 
+Gateway 
+──
+Transit 
+(Core-toR2)
+2
+192.168.39.1
+64/30
+255.255.25
+5.252
+192.168.3
+9.165 –
+192.168.3
+9.166
+N/A
+Project GitHub: https://github.com/Kamo471/Kgosiemang-AttorneysNetworks/blob/main/Milestone1_Report.md
+ 
+ 
+ 
+ 
+ 
+ 
+ 
